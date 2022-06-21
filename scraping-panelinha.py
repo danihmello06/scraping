@@ -1,5 +1,3 @@
-from base64 import encode
-from codecs import utf_8_decode, utf_8_encode
 import urllib.request
 import requests
 from bs4 import BeautifulSoup
@@ -28,7 +26,7 @@ class Steps:
         self.preparation = preparation
 
 
-finalUrl = "https://www.panelinha.com.br/receita/pudim-na-airfryer"
+finalUrl = "https://www.panelinha.com.br/receita/Torta-integral-de-frango-com-espinafre"
 page = urllib.request.urlopen(finalUrl)
 receita = BeautifulSoup(page, 'html.parser')
    
@@ -37,22 +35,14 @@ base = receita.find_all('div', attrs={'class':'col-xs-12 col-sm-6 col-md-7'})
 titulos = base[1].findAll('h4', class_='green h__header')
 ingredEPreparo = base[1].findAll('div', class_='editor ng-star-inserted')
 
-#for i in range(len(ingredEPreparo)):
-    
-ingred1 = ingredEPreparo[0].findAll('li', class_='ng-star-inserted')
-listaIngredientes1 = []
-for ing in ingred1:
-    listaIngredientes1.append(ing.text)
-    
-ingred2 = ingredEPreparo[3].findAll('li', class_='ng-star-inserted')
-listaIngredientes2 = []
-for ing in ingred2:
-    listaIngredientes2.append(ing.text)
-    
 ingredients = []
-ingredients.append(listaIngredientes1)
-ingredients.append(listaIngredientes2)
 
+for i in range(0, len(ingredEPreparo), 3):
+    ing = ingredEPreparo[i].findAll('li', class_='ng-star-inserted')
+    listaIngredientes1 = []
+    for ing in ing:
+        listaIngredientes1.append(ing.text)
+    ingredients.append(listaIngredientes1)
 
 searchRequest = requests.get("https://panelinha-api-server-prod.herokuapp.com/v1/search?pageSize=1000&title=bolo").json()
 
@@ -66,20 +56,21 @@ for i in range(len(results)):
     searchList.append(single.__dict__)
 
 jsonstr1 = json.dumps(searchList, ensure_ascii=False)
-jsonFile = open("testFile.json", "w", encoding="utf-8")
+jsonFile = open("SearchResultData.json", "w", encoding="utf-8")
 jsonFile.write(jsonstr1)
 jsonFile.close()
 
 ########### RECIPE DATA
-recipeRequest = requests.get("https://panelinha-api-server-prod.herokuapp.com/v1/receita/pudim-na-airfryer/null").json()
+recipeRequest = requests.get("https://panelinha-api-server-prod.herokuapp.com/v1/receita/Torta-integral-de-frango-com-espinafre/null").json()
 result = recipeRequest['data']
 content = result['content']
 recipeSteps = content['recipeSteps']
 
+for i in range(len(recipeSteps)):
+    if 'ingredients' not in recipeSteps[i]:
+        recipeSteps.remove(recipeSteps[i])
+
 stepsList = []
-print(len(recipeSteps))
-print('------------------')
-print(len(ingredients))
 for i in range(len(recipeSteps)):
     steps = Steps(
         recipeSteps[i]['title'],
@@ -99,51 +90,6 @@ recipe = Recipe(
 )
 
 jsonstr2 = json.dumps(recipe.__dict__, ensure_ascii=False)
-jsonFile2 = open("testFile2.json", "w", encoding="utf-8")
+jsonFile2 = open("RecipeData.json", "w", encoding="utf-8")
 jsonFile2.write(jsonstr2)
 jsonFile2.close()
-
-
-"""
-r1 = Recipe(listaTitulos, ingredients, preparations)
-
-
-jsonstr1 = json.dumps(r1.__dict__, ensure_ascii=False)
-print(jsonstr1)
-jsonFile = open("testFile.json", "w", encoding="utf-8")
-jsonFile.write(jsonstr1)
-jsonFile.close()
-
-
-preparo1 = ingredEPreparo[2].findAll('li')
-listaPreparo1 = []
-for prep in preparo1:
-    listaPreparo1.append(prep.text)
-    
-preparo2 = ingredEPreparo[5].findAll('li')
-listaPreparo2 = []
-for prep in preparo2:
-    listaPreparo2.append(prep.text)
-    
-preparations = []
-preparations.append([listaPreparo1, listaPreparo2])
-
-/////////////////////////////////////
-
-baseUrl = 'https://www.panelinha.com.br'
-wiki = 'https://www.panelinha.com.br/busca/pudim'
-page = urllib.request.urlopen(wiki)
-soup = BeautifulSoup(page, 'html.parser')
-
-grupo = soup.find('div', attrs={'class':'row row__grid'})
-todosLinks = grupo.find_all('a')
-
-print("---------------------------")
-listaFinal = []
-
-for link in todosLinks:
-    listaFinal.append(link.get('href'))
-
-
-
-"""
