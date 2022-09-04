@@ -18,19 +18,18 @@ class Recipe:
         self.serves = serves
         self.prepareTime = prepareTime
         self.steps = steps
-        
+
 class Steps:
     def __init__(self, title, ingredients, preparation):
         self.title = title
         self.ingredients = ingredients
         self.preparation = preparation
 
-
-finalUrl = "https://www.panelinha.com.br/receita/Torta-integral-de-frango-com-espinafre"
+finalUrl = "https://www.panelinha.com.br/receita/Bolo-de-milho-de-caneca"
 page = urllib.request.urlopen(finalUrl)
 receita = BeautifulSoup(page, 'html.parser')
    
-base = receita.find_all('div', attrs={'class':'col-xs-12 col-sm-6 col-md-7'})
+base = receita.find_all('div', attrs={'class': 'col-xs-12 col-sm-6 col-md-7'})
 
 titulos = base[1].findAll('h4', class_='green h__header')
 ingredEPreparo = base[1].findAll('div', class_='editor ng-star-inserted')
@@ -56,12 +55,13 @@ for i in range(len(results)):
     searchList.append(single.__dict__)
 
 jsonstr1 = json.dumps(searchList, ensure_ascii=False)
-jsonFile = open("SearchResultData.json", "w", encoding="utf-8")
+jsonFile = open("json\SearchResultData.json", "w", encoding="utf-8")
 jsonFile.write(jsonstr1)
 jsonFile.close()
 
 ########### RECIPE DATA
-recipeRequest = requests.get("https://panelinha-api-server-prod.herokuapp.com/v1/receita/Torta-integral-de-frango-com-espinafre/null").json()
+
+recipeRequest = requests.get("https://panelinha-api-server-prod.herokuapp.com/v1/receita/Bolo-de-milho-de-caneca/null").json()
 result = recipeRequest['data']
 content = result['content']
 recipeSteps = content['recipeSteps']
@@ -90,6 +90,6 @@ recipe = Recipe(
 )
 
 jsonstr2 = json.dumps(recipe.__dict__, ensure_ascii=False)
-jsonFile2 = open("RecipeData.json", "w", encoding="utf-8")
+jsonFile2 = open("json\RecipeData.json", "w", encoding="utf-8")
 jsonFile2.write(jsonstr2)
 jsonFile2.close()
