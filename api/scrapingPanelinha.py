@@ -1,7 +1,6 @@
 import urllib.request
 import requests
 from bs4 import BeautifulSoup
-import json
 
 class SearchResult:
     def __init__(self, slug, imageUrl, title):
@@ -25,11 +24,9 @@ class Steps:
         self.ingredients = ingredients
         self.preparation = preparation
 
-ingredients = []
-
-def getSearchResult(palavra):
+def getSearchResult(word):
     
-    searchUrl = "https://panelinha-api-server-prod.herokuapp.com/v1/search?pageSize=1000&title="+palavra
+    searchUrl = "https://panelinha-api-server-prod.herokuapp.com/v1/search?pageSize=1000&title="+word
     searchRequest = requests.get(searchUrl).json()
 
     searchList = []
@@ -38,53 +35,49 @@ def getSearchResult(palavra):
         slug = results[i]['slug']
         imageUrl = results[i]['imageUrl']
         title = results[i]['title']
-        single = SearchResult(slug, imageUrl, title)
-        searchList.append(single.__dict__)
+        recipeFound = SearchResult(slug, imageUrl, title)
+        
+        if results[i]['imageFolder'] == 'receita':
+            searchList.append(recipeFound.__dict__)
 
     return searchList
 
-    #jsonstr1 = json.dumps(searchList, ensure_ascii=False)
-    #jsonFile = open("json\SearchResultData.json", "w", encoding="utf-8")
-    #jsonFile.write(jsonstr1)
-    #jsonFile.close()
-
 def getRecipe(slug):
     
-    finalUrl333 = "https://www.panelinha.com.br/busca/"+slug
-    page = urllib.request.urlopen(finalUrl333)
-    receita = BeautifulSoup(page, 'html.parser')
+    urlBS = "https://www.panelinha.com.br/receita/"+slug
+    page = urllib.request.urlopen(urlBS)
+    pageBS = BeautifulSoup(page, 'html.parser')
     
-    base = receita.find_all('div', attrs={'class': 'col-xs-12 col-sm-6 col-md-7'})
-    ingredEPreparo = base[0].findAll('div', class_='editor ng-star-inserted')
+    base = pageBS.find_all('div', attrs={'class': 'col-xs-12 col-sm-6 col-md-7'})
+    ingredientsAndInstructions = base[1].findAll('div', class_='editor ng-star-inserted')
+    ingredientsList = []
 
-    ingredients = []
-
-    for i in range(0, len(ingredEPreparo), 3):
-        ing = ingredEPreparo[i].findAll('li', class_='ng-star-inserted')
-        listaIngredientes1 = []
-        for ing in ing:
-            listaIngredientes1.append(ing.text)
-        ingredients.append(listaIngredientes1)
-        
-    finalUrl = "https://panelinha-api-server-prod.herokuapp.com/v1/receita/"+slug
-    recipeRequest = requests.get(finalUrl).json()
+    for i in range(0, len(ingredientsAndInstructions), 3):
+        ingredientsOnly = ingredientsAndInstructions[i].findAll('li', class_='ng-star-inserted')
+        ingredientsInIntruction = []
+        for ing in ingredientsOnly:
+            ingredientsInIntruction.append(ing.text)
+        ingredientsList.append(ingredientsInIntruction)
+    
+    recipeUrl = "https://panelinha-api-server-prod.herokuapp.com/v1/receita/"+slug
+    recipeRequest = requests.get(recipeUrl).json()
     result = recipeRequest['data']
     content = result['content']
     recipeSteps = content['recipeSteps']
-
+    
     for i in range(len(recipeSteps)):
         if 'ingredients' not in recipeSteps[i]:
             recipeSteps.remove(recipeSteps[i])
-
+    
     stepsList = []
     for i in range(len(recipeSteps)):
         steps = Steps(
             recipeSteps[i]['title'],
-            ingredients[i],
+            ingredientsList[i],
             recipeSteps[i]['body']
         )
         stepsList.append(steps.__dict__)
-
+    
     recipe = Recipe(
         result['title'], 
         result['imageUrl'], 
@@ -95,4 +88,4 @@ def getRecipe(slug):
         stepsList
     )
     
-    return recipe
+    return recipe.__dict__
