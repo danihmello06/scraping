@@ -71,10 +71,12 @@ def getRecipe(slug):
     
     stepsList = []
     for i in range(len(recipeSteps)):
+        stepPreparation = recipeSteps[i]['body']
+        formattedStepPreparation = BeautifulSoup(stepPreparation, 'html.parser').getText()
         steps = Steps(
             recipeSteps[i]['title'],
             ingredientsList[i],
-            recipeSteps[i]['body']
+            formattedStepPreparation
         )
         stepsList.append(steps.__dict__)
     
