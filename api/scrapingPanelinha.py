@@ -64,17 +64,17 @@ def getRecipe(slug):
     result = recipeRequest['data']
     content = result['content']
     recipeSteps = content['recipeSteps']
-    
+    stepsUpdated = []
     for i in range(len(recipeSteps)):
-        if 'ingredients' not in recipeSteps[i]:
-            recipeSteps.remove(recipeSteps[i])
+        if 'ingredients' in recipeSteps[i]:
+            stepsUpdated.append(recipeSteps[i])
     
     stepsList = []
-    for i in range(len(recipeSteps)):
-        stepPreparation = recipeSteps[i]['body']
+    for i in range(len(stepsUpdated)):
+        stepPreparation = stepsUpdated[i]['body']
         formattedStepPreparation = BeautifulSoup(stepPreparation, 'html.parser').getText()
         steps = Steps(
-            recipeSteps[i]['title'],
+            stepsUpdated[i]['title'],
             ingredientsList[i],
             formattedStepPreparation
         )
