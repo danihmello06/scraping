@@ -49,6 +49,7 @@ def getRecipe(slug):
     pageBS = BeautifulSoup(page, 'html.parser')
     
     base = pageBS.find_all('div', attrs={'class': 'col-xs-12 col-sm-6 col-md-7'})
+    print(base)
     ingredientsAndInstructions = base[1].findAll('div', class_='editor ng-star-inserted')
     ingredientsList = []
 
