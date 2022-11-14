@@ -1,4 +1,3 @@
-import urllib.request
 import requests
 from bs4 import BeautifulSoup
 
@@ -45,11 +44,10 @@ def getSearchResult(word):
 def getRecipe(slug):
     
     urlBS = "https://www.panelinha.com.br/receita/"+slug
-    page = urllib.request.urlopen(urlBS)
-    pageBS = BeautifulSoup(page, 'html.parser')
+    data = requests.get(urlBS)
+    pageBS = BeautifulSoup(data.content, 'html.parser')
     
     base = pageBS.find_all('div', attrs={'class': 'col-xs-12 col-sm-6 col-md-7'})
-    print(base)
     ingredientsAndInstructions = base[1].findAll('div', class_='editor ng-star-inserted')
     ingredientsList = []
 
