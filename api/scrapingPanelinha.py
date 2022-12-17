@@ -53,7 +53,6 @@ def get_search_result(word):
 
     return all_lists_combined
 
-
 def order_results_equally(all_lists_combined):
     sorted_list = sorted(all_lists_combined, key = itemgetter(2))
     list_of_search_result = []
@@ -100,7 +99,7 @@ def get_recipe_from_panelinha(slug):
         formatted_step_preparation = BeautifulSoup(step_preparation, 'html.parser').getText()
         steps = Steps(
             steps_updated[i]['title'],
-            steps_updated[i],
+            ingredients_list[i],
             formatted_step_preparation
         )
         steps_list.append(steps.__dict__)
@@ -115,7 +114,7 @@ def get_recipe_from_panelinha(slug):
         steps_list
     )
     
-    return recipe
+    return recipe.__dict__
 
 def get_recipe(slug, author):
 
@@ -123,5 +122,5 @@ def get_recipe(slug, author):
     if author == "panelinha":
         recipe = get_recipe_from_panelinha(slug)
 
-    return recipe.__dict__
+    return recipe
     
