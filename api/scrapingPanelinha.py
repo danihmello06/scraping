@@ -2,19 +2,19 @@ import requests
 from bs4 import BeautifulSoup
 
 class SearchResult:
-    def __init__(self, slug, imageUrl, title):
+    def __init__(self, slug, image_url, title):
         self.slug = slug
-        self.imageUrl = imageUrl
+        self.image_url = image_url
         self.title = title
 
 class Recipe:
-    def __init__(self, title, imageUrl, slug, author, serves, prepareTime, steps):
+    def __init__(self, title, image_url, slug, author, serves, prepare_time, steps):
         self.title = title
-        self.imageUrl = imageUrl
+        self.image_url = image_url
         self.slug = slug
         self.author = author
         self.serves = serves
-        self.prepareTime = prepareTime
+        self.prepare_time = prepare_time
         self.steps = steps
 
 class Steps:
@@ -23,61 +23,61 @@ class Steps:
         self.ingredients = ingredients
         self.preparation = preparation
 
-def getSearchResult(word):
+def get_search_result(word):
     
-    searchUrl = "https://panelinha-api-server-prod.herokuapp.com/v1/search?pageSize=1000&title="+word
-    searchRequest = requests.get(searchUrl).json()
+    search_url = "https://panelinha-api-server-prod.herokuapp.com/v1/search?pageSize=1000&title="+word
+    search_request = requests.get(search_url).json()
 
-    searchList = []
-    results = searchRequest['data']['results']
+    search_list = []
+    results = search_request['data']['results']
     for i in range(len(results)):
         slug = results[i]['slug']
-        imageUrl = results[i]['imageUrl']
+        image_url = results[i]['imageUrl']
         title = results[i]['title']
-        recipeFound = SearchResult(slug, imageUrl, title)
+        recipe_found = SearchResult(slug, image_url, title)
         
         if results[i]['imageFolder'] == 'receita':
-            searchList.append(recipeFound.__dict__)
+            search_list.append(recipe_found.__dict__)
 
-    return searchList
+    return search_list
 
-def getRecipe(slug):
+def get_recipe(slug):
     
-    urlBS = "https://www.panelinha.com.br/receita/"+slug
-    data = requests.get(urlBS)
-    pageBS = BeautifulSoup(data.content, 'html.parser')
+    url_bs = "https://www.panelinha.com.br/receita/"+slug
+    data = requests.get(url_bs)
+    page_bs = BeautifulSoup(data.content, 'html.parser')
     
-    base = pageBS.find_all('div', attrs={'class': 'col-xs-12 col-sm-6 col-md-7'})
-    ingredientsAndInstructions = base[1].findAll('div', class_='editor ng-star-inserted')
-    ingredientsList = []
+    base = page_bs.find_all('div', attrs={'class': 'col-xs-12 col-sm-6 col-md-7'})
+    ingredients_and_instructions = base[1].findAll('div', class_='editor ng-star-inserted')
+    ingredients_list = []
 
-    for i in range(0, len(ingredientsAndInstructions), 3):
-        ingredientsOnly = ingredientsAndInstructions[i].findAll('li', class_='ng-star-inserted')
-        ingredientsInIntruction = []
-        for ing in ingredientsOnly:
-            ingredientsInIntruction.append(ing.text)
-        ingredientsList.append(ingredientsInIntruction)
+    for i in range(0, len(ingredients_and_instructions), 3):
+        ingredients_only = ingredients_and_instructions[i].findAll('li', class_='ng-star-inserted')
+        ingredients_in_intruction = []
+        for ing in ingredients_only:
+            ingredients_in_intruction.append(ing.text)
+        ingredients_list.append(ingredients_in_intruction)
     
-    recipeUrl = "https://panelinha-api-server-prod.herokuapp.com/v1/receita/"+slug
-    recipeRequest = requests.get(recipeUrl).json()
-    result = recipeRequest['data']
+    recipe_url = "https://panelinha-api-server-prod.herokuapp.com/v1/receita/"+slug
+    recipe_request = requests.get(recipe_url).json()
+    result = recipe_request['data']
     content = result['content']
-    recipeSteps = content['recipeSteps']
-    stepsUpdated = []
-    for i in range(len(recipeSteps)):
-        if 'ingredients' in recipeSteps[i]:
-            stepsUpdated.append(recipeSteps[i])
+    recipe_steps = content['recipeSteps']
+    steps_updated = []
+    for i in range(len(recipe_steps)):
+        if 'ingredients' in recipe_steps[i]:
+            steps_updated.append(recipe_steps[i])
     
-    stepsList = []
-    for i in range(len(stepsUpdated)):
-        stepPreparation = stepsUpdated[i]['body']
-        formattedStepPreparation = BeautifulSoup(stepPreparation, 'html.parser').getText()
+    steps_list = []
+    for i in range(len(steps_updated)):
+        step_preparation = steps_updated[i]['body']
+        formatted_step_preparation = BeautifulSoup(step_preparation, 'html.parser').getText()
         steps = Steps(
-            stepsUpdated[i]['title'],
-            ingredientsList[i],
-            formattedStepPreparation
+            steps_updated[i]['title'],
+            steps_updated[i],
+            formatted_step_preparation
         )
-        stepsList.append(steps.__dict__)
+        steps_list.append(steps.__dict__)
     
     recipe = Recipe(
         result['title'], 
@@ -86,7 +86,7 @@ def getRecipe(slug):
         content['author'], 
         content['serves'], 
         content['prepareTime'],
-        stepsList
+        steps_list
     )
     
     return recipe.__dict__
