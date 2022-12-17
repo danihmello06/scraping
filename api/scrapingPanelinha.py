@@ -67,10 +67,8 @@ def order_results_equally(all_lists_combined):
         )
         list_of_search_result.append(search_item.__dict__)        
     return list_of_search_result
-    
 
-def get_recipe(slug):
-    
+def get_recipe_from_panelinha(slug):
     url_bs = "https://www.panelinha.com.br/receita/"+slug
     data = requests.get(url_bs)
     page_bs = BeautifulSoup(data.content, 'html.parser')
@@ -117,4 +115,13 @@ def get_recipe(slug):
         steps_list
     )
     
+    return recipe
+
+def get_recipe(slug, author):
+
+    recipe = Recipe("","","","","","","")
+    if author == "panelinha":
+        recipe = get_recipe_from_panelinha(slug)
+
     return recipe.__dict__
+    
