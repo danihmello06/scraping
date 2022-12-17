@@ -1,10 +1,13 @@
 import requests
 from bs4 import BeautifulSoup
+from operator import itemgetter
 
 class SearchResult:
-    def __init__(self, slug, image_url, title):
-        self.slug = slug
+    def __init__(self, author, image_url, index, slug, title):
+        self.author = author
         self.image_url = image_url
+        self.index = index
+        self.slug = slug
         self.title = title
 
 class Recipe:
@@ -23,23 +26,48 @@ class Steps:
         self.ingredients = ingredients
         self.preparation = preparation
 
-def get_search_result(word):
-    
+def get_search_from_panelinha(word):
+
     search_url = "https://panelinha-api-server-prod.herokuapp.com/v1/search?pageSize=1000&title="+word
     search_request = requests.get(search_url).json()
 
     search_list = []
     results = search_request['data']['results']
     for i in range(len(results)):
-        slug = results[i]['slug']
+        author = "panelinha"
         image_url = results[i]['imageUrl']
+        index = i
+        slug = results[i]['slug']
         title = results[i]['title']
-        recipe_found = SearchResult(slug, image_url, title)
+        recipe_found = [author, image_url, index, slug, title]
         
         if results[i]['imageFolder'] == 'receita':
-            search_list.append(recipe_found.__dict__)
+            search_list.append(recipe_found)
 
     return search_list
+
+def get_search_result(word):
+    
+    result_from_panelinha = get_search_from_panelinha(word)
+    all_lists_combined = order_results_equally(result_from_panelinha)
+
+    return all_lists_combined
+
+
+def order_results_equally(all_lists_combined):
+    sorted_list = sorted(all_lists_combined, key = itemgetter(2))
+    list_of_search_result = []
+    for i in range(len(sorted_list)):
+        search_item = SearchResult(
+            author = sorted_list[i][0],
+            image_url = sorted_list[i][1],
+            index = sorted_list[i][2],
+            slug = sorted_list[i][3],
+            title = sorted_list[i][4]
+        )
+        list_of_search_result.append(search_item.__dict__)        
+    return list_of_search_result
+    
 
 def get_recipe(slug):
     

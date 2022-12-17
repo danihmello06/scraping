@@ -12,7 +12,8 @@ def do_search():
 @app.route('/recipe')
 def open_recipe():
     slug = request.args.get('slug')
-    return get_recipe(slug)
+    author = request.args.get('author')
+    return get_recipe(slug, author)
 
 @app.route('/policy')
 def open_policy():
