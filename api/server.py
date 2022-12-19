@@ -15,9 +15,5 @@ def open_recipe():
     author = request.args.get('author')
     return get_recipe(slug, author)
 
-@app.route('/policy')
-def open_policy():
-    return get_policy()
-
 if __name__ == '__main__':
     app.run()

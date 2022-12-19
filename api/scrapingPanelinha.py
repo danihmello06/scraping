@@ -26,6 +26,13 @@ class Steps:
         self.ingredients = ingredients
         self.preparation = preparation
 
+def get_search_result(word):
+    
+    result_from_panelinha = get_search_from_panelinha(word)
+    all_lists_combined = order_results_equally(result_from_panelinha)
+
+    return all_lists_combined
+
 def get_search_from_panelinha(word):
 
     search_url = "https://panelinha-api-server-prod.herokuapp.com/v1/search?pageSize=1000&title="+word
@@ -45,13 +52,6 @@ def get_search_from_panelinha(word):
             search_list.append(recipe_found)
 
     return search_list
-
-def get_search_result(word):
-    
-    result_from_panelinha = get_search_from_panelinha(word)
-    all_lists_combined = order_results_equally(result_from_panelinha)
-
-    return all_lists_combined
 
 def order_results_equally(all_lists_combined):
     sorted_list = sorted(all_lists_combined, key = itemgetter(2))
@@ -113,8 +113,8 @@ def get_recipe_from_panelinha(slug):
         content['prepareTime'],
         steps_list
     )
-    
-    return recipe.__dict__
+
+    return recipe
 
 def get_recipe(slug, author):
 
@@ -122,5 +122,5 @@ def get_recipe(slug, author):
     if author == "panelinha":
         recipe = get_recipe_from_panelinha(slug)
 
-    return recipe
+    return recipe.__dict__
     
